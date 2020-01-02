@@ -15,6 +15,5 @@ public interface EmpDao {
     public void updateEmp(Emp emp);
     //名字查询
     public List<Emp> selectByName(String name);
-    //你好
-    public void hello(String name);
+    
 }
