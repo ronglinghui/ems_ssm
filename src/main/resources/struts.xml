@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<package name="manager" extends="struts-default" namespace="/manager">
+		<action name="*" class="managerAction" method="{1}">
+			<result name="loginok" type="redirectAction">
+				<param name="namespace">/emp</param>
+				<param name="actionName">selectEmp</param>
+			</result>
+			<result name="loginerror">/login.jsp</result>
+			<result name="register" type="redirect">/login.jsp</result>
+			<result name="registerno">/regist.jsp</result>
+		</action>
+
+	</package>
+	<package name="emp" extends="struts-default" namespace="/emp">
+		<action name="*" class="empAction" method="{1}">
+			<!--查询全部方法-->
+			<result name="selectEmp">/emplist.jsp</result>
+			<!--删除方法-->
+			<result name="deleteEmp" type="redirectAction">selectEmp</result>
+			<!--通过id查询用户-->
+			<result name="selectById">/updateEmp.jsp</result>
+			<!--用户修改-->
+			<result name="updateEmp" type="redirectAction">selectEmp</result>
+			<!--添加的方法-->
+			<result name="insertEmp" type="redirectAction">selectEmp</result>
+			<!--批量删除-->
+			<result name="pl" type="redirectAction">selectEmp</result>
+		</action>
+		<action name="code" class="codeAction"></action>
+
+	</package>
+</struts>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--
+    ============================spring和mybatis的整合==============================================================
+    -->
+    <!--
+        创建数据源
+    -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mysqldate"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+    </bean>
+    <!--
+        创建mybatis的核心 SQLSessionfactory
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--注入连接参数-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--注册mapper文件-->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+        <!--设置实体类别名-->
+        <property name="typeAliasesPackage" value="com.baizhi.entity"/>
+    </bean>
+    <!--
+        创建dao的实体类
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--引入SQLSessionfactory 在工厂中-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <!--给dao接口的实现类设置别名-->
+        <property name="basePackage" value="com.baizhi.dao"/>
+    </bean>
+    <!--
+    事物管理
+    -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--依赖于数据源-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--
+    创建环绕通知
+    -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--管理员方法-->
+            <tx:method name="login" propagation="SUPPORTS"/>
+            <tx:method name="register"/>
+            <!--员工方法-->
+            <tx:method name="insertEmp"/>
+            <tx:method name="selectEmp" propagation="SUPPORTS"/>
+            <tx:method name="deleteEmp"/>
+            <tx:method name="updateEmp"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--
+    组装切面
+    -->
+    <aop:config>
+        <!--创建切点-->
+        <aop:pointcut id="pc1" expression="within(com.baizhi.service.impl.*)"/>
+        <!--整合切面-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pc1"/>
+    </aop:config>
+    <!--
+        定义service中的实现类对象
+    -->
+    <bean id="managerService" class="com.baizhi.service.impl.ManagerServiceImpl">
+        <!--引入managerService依赖对象-->
+        <property name="managerDao" ref="managerDao"/>
+    </bean>
+    <!--员工-->
+    <bean id="empService" class="com.baizhi.service.impl.EmpServiceImpl">
+        <!--引入empService依赖对象-->
+        <property name="empDao" ref="empDao"/>
+    </bean>
+
+    <!--
+        ======================spring和Struts2的整合==============================================================
+    -->
+    <!--管理员  action是控制成-->
+    <bean id="managerAction" class="com.baizhi.action.ManagerAction" scope="prototype">
+        <property name="managerService" ref="managerService"/>
+    </bean>
+    <!--员工  action是控制成-->
+    <bean id="empAction" class="com.baizhi.action.EmpAction" scope="prototype">
+        <property name="empService" ref="empService"/>
+    </bean>
+    <!--验证码  action是控制成-->
+    <bean id="codeAction" class="com.baizhi.action.ValidationCodeAction" scope="prototype"></bean>
+</beans>
